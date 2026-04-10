@@ -10,10 +10,23 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// 检查环境变量
+const databaseUrl = process.env.TURSO_DATABASE_URL;
+const authToken = process.env.TURSO_AUTH_TOKEN;
+
+console.log('Environment check:');
+console.log('Database URL:', databaseUrl);
+console.log('Auth Token:', authToken ? 'Present' : 'Missing');
+
+if (!databaseUrl) {
+  console.error('ERROR: TURSO_DATABASE_URL is not set');
+  process.exit(1);
+}
+
 // 初始化Turso客户端
 const db = createClient({
-  url: process.env.TURSO_DATABASE_URL,
-  authToken: process.env.TURSO_AUTH_TOKEN
+  url: databaseUrl,
+  authToken: authToken
 });
 
 // 初始化数据库表
