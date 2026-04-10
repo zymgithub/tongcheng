@@ -19,6 +19,9 @@ const db = createClient({
 // 初始化数据库表
 async function initDatabase() {
   try {
+    console.log('Initializing database...');
+    console.log('Database URL:', process.env.TURSO_DATABASE_URL);
+    
     // 创建orders表
     await db.execute(`
       CREATE TABLE IF NOT EXISTS orders (
@@ -39,6 +42,7 @@ async function initDatabase() {
     console.log('Database initialized successfully');
   } catch (error) {
     console.error('Error initializing database:', error);
+    // 继续运行，即使数据库初始化失败
   }
 }
 
@@ -143,8 +147,15 @@ app.delete('/api/orders/:id', async (req, res) => {
 });
 
 // 健康检查
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
+app.get('/health', async (req, res) => {
+  try {
+    // 测试数据库连接
+    await db.execute('SELECT 1');
+    res.status(200).json({ status: 'ok', database: 'connected' });
+  } catch (error) {
+    console.error('Health check database error:', error);
+    res.status(200).json({ status: 'ok', database: 'error', error: error.message });
+  }
 });
 
 app.listen(port, () => {
